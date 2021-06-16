@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>C:/Users/rknew/source/repos/SpiritSpeaker/src/Content/effect.fx</SourceFile>
+  <SourceTime>2021-05-25T09:58:21.7168565-05:00</SourceTime>
+  <DestFile>C:/Users/rknew/source/repos/SpiritSpeaker/src/Content/bin/DesktopGL/Content/effect.xnb</DestFile>
+  <DestTime>2021-06-15T23:08:55.7848949-05:00</DestTime>
+  <Importer>EffectImporter</Importer>
+  <ImporterTime>2018-08-05T14:17:44-05:00</ImporterTime>
+  <Processor>EffectProcessor</Processor>
+  <ProcessorTime>2018-08-05T14:17:44-05:00</ProcessorTime>
+  <Parameters>
+    <Key>DebugMode</Key>
+    <Value>Auto</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

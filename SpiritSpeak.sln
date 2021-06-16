@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpiritSpeak", "src\SpiritSpeak.csproj", "{FFBA2922-946B-4E26-999E-FA8D0AA93716}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nez", "Nez-master\Nez.Portable\Nez.csproj", "{8AB53DF3-458E-490B-93DE-2813B4700467}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpiritSpeak.Combat", "SpiritSpeak.Battle\SpiritSpeak.Combat.csproj", "{8AB649E0-A8D8-4D94-A30F-A71E6E9496F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpiritSpeak.Combat.Test", "SpiritSpeak.Combat.Test\SpiritSpeak.Combat.Test.csproj", "{BFA322E0-0598-4528-BAF7-F8B0693D37A5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFBA2922-946B-4E26-999E-FA8D0AA93716}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFBA2922-946B-4E26-999E-FA8D0AA93716}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFBA2922-946B-4E26-999E-FA8D0AA93716}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFBA2922-946B-4E26-999E-FA8D0AA93716}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AB53DF3-458E-490B-93DE-2813B4700467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AB53DF3-458E-490B-93DE-2813B4700467}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AB53DF3-458E-490B-93DE-2813B4700467}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AB53DF3-458E-490B-93DE-2813B4700467}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AB649E0-A8D8-4D94-A30F-A71E6E9496F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AB649E0-A8D8-4D94-A30F-A71E6E9496F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AB649E0-A8D8-4D94-A30F-A71E6E9496F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AB649E0-A8D8-4D94-A30F-A71E6E9496F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFA322E0-0598-4528-BAF7-F8B0693D37A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA322E0-0598-4528-BAF7-F8B0693D37A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFA322E0-0598-4528-BAF7-F8B0693D37A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA322E0-0598-4528-BAF7-F8B0693D37A5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {12C8DC0B-8AC8-4D91-9FAD-376DF74B6988}
+	EndGlobalSection
+EndGlobal
