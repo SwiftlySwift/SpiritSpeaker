@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nez-master\Nez.Portable\Nez.csproj" />
+    <ProjectReference Include="..\SpiritSpeak.Battle\SpiritSpeak.Combat.csproj" />
   </ItemGroup>
 
 </Project>

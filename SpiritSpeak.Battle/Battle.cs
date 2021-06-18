@@ -14,6 +14,11 @@ namespace SpiritSpeak.Combat
         public int CurrentInitiative { get; set; }
         public int MaxInitiative { get; set; }
 
+        public Battle()
+        {
+            Commanders = new List<Commander>();
+        }
+
         public void StartCombat()
         {
             TieBreakInitiatives();

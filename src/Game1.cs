@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using Nez;
 using Nez.Particles;
 using Nez.Sprites;
+using Nez.Textures;
+using SpiritSpeak.Combat;
 using System;
 
 namespace SpiritSpeak
@@ -12,8 +14,11 @@ namespace SpiritSpeak
     {
         private Entity myFirstEntity;
         private Entity mySecondEntity;
-        private Entity rotationAnchor;
-        private Effect myEffect;
+
+        private Battle testBattle;
+
+        private double Timer = 2d;
+        private bool Animating = false;
 
         public Game1()
         {
@@ -31,48 +36,71 @@ namespace SpiritSpeak
 
             Scene = new Scene();
 
-            mySecondEntity = Scene.CreateEntity("GoodByeWorld");
+            testBattle = new Battle();
 
-            myFirstEntity = Scene.CreateEntity("HelloWorld");
-            //var noteTex = Scene.Content.Load<Texture2D>("notes");
-            //var textComponent = new SpriteRenderer(noteTex);//new TextComponent(Graphics.Instance.BitmapFont, "Hello World", Vector2.Zero, Color.White);
-            //myFirstEntity.AddComponent(textComponent);
-            //textComponent.OriginNormalized = new Vector2(.5f, .5f);
-            //textComponent.Material = Material.StencilWrite();
-
-            var tex = Scene.Content.Load<Texture2D>("notes");
-            var lava = new SpriteRenderer(tex)
+            var leftCommander = new Commander(0)
             {
-                Color = Color.White,
+                Initiative = 1
             };
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0)
+            {
+                MaxVitality = 20,
+                Vitality = 20,
+                Strength = 5,
+            });
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0)
+            {
+                MaxVitality = 20,
+                Vitality = 20,
+                Strength = 6,
+            });
+            testBattle.Commanders.Add(leftCommander);
 
-            //lava.Material = Material.StencilRead();
-            //lava.Material = new Material();
+            var rightCommander = new Commander(1);
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1)
+            {
+                MaxVitality = 20,
+                Vitality = 20,
+                Strength = 15,
+            });
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1)
+            {
+                MaxVitality = 20,
+                Vitality = 20,
+                Strength = 25,
+            });
+            testBattle.Commanders.Add(rightCommander);
 
-            myEffect = Scene.Content.Load<Effect>("spriteEffect");
-            lava.Material.Effect = myEffect;
-            var noteTexture = Scene.Content.Load<Texture>("notes");
+            testBattle.StartCombat();
 
-            mySecondEntity.AddComponent(lava);
-            lava.OriginNormalized = new Vector2(0, 0);
+            SetupBattle(testBattle);
+        }
+        private void SetupBattle(Battle testBattle)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
 
+            var leftSideSpirits = testBattle.Commanders[0].Spirits;
+            var rightSideSpirits = testBattle.Commanders[1].Spirits;
 
+            var leftAnchor = new Vector2(100, 100);
+            var rightAnchor = new Vector2(300, 100);
+            var sidx = 5;
+            foreach (var spirit in leftSideSpirits)
+            {
+                var entity = Scene.CreateEntity($"{spirit.Id}", leftAnchor);
+                var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
+                entity.AddComponent(spriteRenderer);
+                leftAnchor = leftAnchor + new Vector2(0, 85);
+            }
 
-            //var pConfig = new ParticleEmitterConfig();
-            //pConfig.Sprite = Graphics.Instance.PixelTexture;
-            //pConfig.Duration = 3000;
-            //pConfig.EmissionRate = 100;
-            //pConfig.AngleVariance = 30;
-            //pConfig.MaxParticles = 100;
-            //pConfig.ParticleLifespan = 1;
-            //pConfig.StartParticleSize = 5;
-            //pConfig.FinishParticleSize = 0;
-            //pConfig.Speed = 100;
-            //pConfig.StartColor = Color.Blue;
-            //pConfig.StartColorVariance = Color.Red;
-
-            //var particleEmitter = new ParticleEmitter(pConfig);
-
+            foreach (var spirit in rightSideSpirits)
+            {
+                var entity = Scene.CreateEntity($"{spirit.Id}", rightAnchor);
+                var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
+                entity.AddComponent(spriteRenderer);
+                rightAnchor = rightAnchor + new Vector2(0, 85);
+            }
         }
 
         protected override void LoadContent()
@@ -87,11 +115,29 @@ namespace SpiritSpeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            var noteTexture = Scene.Content.Load<Texture>("notes");
+            if (!Animating)
+            {
+                Timer -= gameTime.ElapsedGameTime.TotalSeconds;
+                if (Timer < 0)
+                {
+                    Timer = 4;
+                    //Animating = true;
 
-            myFirstEntity.Position = Input.MousePosition;
+                    var battleResult = testBattle.TakeTurn();
 
-            // TODO: Add your update logic here
+                    foreach(var damageResult in battleResult.DamageResults)
+                    {
+                        var sourceId = damageResult.Source.Id;
+                        var targetId = damageResult.Target.Id;
+
+                        var sourceEntity = Scene.FindEntity(sourceId.ToString());
+                        var targetEntity = Scene.FindEntity(targetId.ToString());
+
+                        sourceEntity.Tween("LocalPosition", targetEntity.LocalPosition, 2).SetLoops(Nez.Tweens.LoopType.PingPong).Start();
+                        targetEntity.Tween("LocalPosition", targetEntity.LocalPosition + new Vector2(0, -50), 1).SetLoops(Nez.Tweens.LoopType.PingPong).SetDelay(1).Start();
+                    }
+                }
+            }
 
             base.Update(gameTime);
         }
