@@ -42,13 +42,13 @@ namespace SpiritSpeak.Combat
                 throw new Exception("Battle grid out of sync, spirit not in correct location");
             }
 
-            currentLocation.Spirit = null;
             var newLocation = Grid[source.GridLocation.X + move.X, source.GridLocation.Y+move.Y];
             if (newLocation.Spirit != null)
             {
                 //Spirit is in the way. This generally calls for cancelling the move, and reveals a hidden unit or trap.
                 return false;
             }
+            currentLocation.Spirit = null;
             source.GridLocation += move;
             Grid[source.GridLocation.X, source.GridLocation.Y].Spirit = source;
             return true;
