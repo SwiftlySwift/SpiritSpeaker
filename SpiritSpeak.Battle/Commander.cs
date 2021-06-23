@@ -39,11 +39,14 @@ namespace SpiritSpeak.Combat
                     DebugMessage = "RAWR!",
                     Source = mySpirit
                 };
-                action.Movements = approach.Movements;
-                if (approach.AtTarget)
+                if (approach != null)
                 {
-                    action.Damage = mySpirit.Strength;
-                    action.Target = randomEnemy;
+                    action.Movements = approach.Movements;
+                    if (approach.AtTarget)
+                    {
+                        action.Damage = mySpirit.Strength;
+                        action.Target = randomEnemy;
+                    }
                 }
 
                 return action;

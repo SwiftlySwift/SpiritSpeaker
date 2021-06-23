@@ -48,27 +48,27 @@ namespace SpiritSpeak
                 Vitality = 20,
                 Strength = 5,
             });
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
-            {
-                MaxVitality = 20,
-                Vitality = 20,
-                Strength = 6,
-            });
+            //leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
+            //{
+            //    MaxVitality = 20,
+            //    Vitality = 20,
+            //    Strength = 6,
+            //});
             testBattle.Commanders.Add(leftCommander);
 
             var rightCommander = new Commander(1);
-            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 0)
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 4)
             {
                 MaxVitality = 20,
                 Vitality = 20,
                 Strength = 15,
             });
-            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 1)
-            {
-                MaxVitality = 20,
-                Vitality = 20,
-                Strength = 25,
-            });
+            //rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 1)
+            //{
+            //    MaxVitality = 20,
+            //    Vitality = 20,
+            //    Strength = 25,
+            //});
             testBattle.Commanders.Add(rightCommander);
 
             testBattle.StartCombat();
@@ -115,13 +115,16 @@ namespace SpiritSpeak
                 Timer -= gameTime.ElapsedGameTime.TotalSeconds;
                 if (Timer < 0)
                 {
-                    Timer = 4;
+                    Timer = 1;
 
                     var battleResult = testBattle.TakeTurn();
-                    var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
-                    var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize, battleResult.Source.GridLocation.Y * gridTileSize) + gridAnchor;
+                    if (battleResult.Source != null)
+                    {
+                        var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
+                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize, battleResult.Source.GridLocation.Y * gridTileSize) + gridAnchor;
 
-                    sourceEntity.TweenLocalPositionTo(newLocation);
+                        sourceEntity.TweenLocalPositionTo(newLocation).Start();
+                    }
                 }
             }
 
