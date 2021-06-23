@@ -42,13 +42,13 @@ namespace SpiritSpeak
             {
                 Initiative = 1
             };
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0)
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0,0,0)
             {
                 MaxVitality = 20,
                 Vitality = 20,
                 Strength = 5,
             });
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0)
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
             {
                 MaxVitality = 20,
                 Vitality = 20,
@@ -57,13 +57,13 @@ namespace SpiritSpeak
             testBattle.Commanders.Add(leftCommander);
 
             var rightCommander = new Commander(1);
-            rightCommander.Spirits.Add(new Spirit(testBattle, 1)
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 0)
             {
                 MaxVitality = 20,
                 Vitality = 20,
                 Strength = 15,
             });
-            rightCommander.Spirits.Add(new Spirit(testBattle, 1)
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 1)
             {
                 MaxVitality = 20,
                 Vitality = 20,
@@ -80,26 +80,17 @@ namespace SpiritSpeak
             var texture = Content.Load<Texture2D>("Sprites");
             var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
 
-            var leftSideSpirits = testBattle.Commanders[0].Spirits;
-            var rightSideSpirits = testBattle.Commanders[1].Spirits;
+            var spirits = testBattle.Spirits;
 
-            var leftAnchor = new Vector2(100, 100);
-            var rightAnchor = new Vector2(300, 100);
+            var gridAnchor = new Vector2(100, 100);
             var sidx = 5;
-            foreach (var spirit in leftSideSpirits)
+            var gridTileSize = 90;
+            foreach (var spirit in spirits)
             {
-                var entity = Scene.CreateEntity($"{spirit.Id}", leftAnchor);
+                var location = new Vector2(spirit.GridLocation.X * gridTileSize, spirit.GridLocation.Y * gridTileSize) + gridAnchor;
+                var entity = Scene.CreateEntity($"{spirit.Id}", location);
                 var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
                 entity.AddComponent(spriteRenderer);
-                leftAnchor = leftAnchor + new Vector2(0, 85);
-            }
-
-            foreach (var spirit in rightSideSpirits)
-            {
-                var entity = Scene.CreateEntity($"{spirit.Id}", rightAnchor);
-                var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
-                entity.AddComponent(spriteRenderer);
-                rightAnchor = rightAnchor + new Vector2(0, 85);
             }
         }
 
@@ -115,27 +106,22 @@ namespace SpiritSpeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            var gridAnchor = new Vector2(100, 100);
+            var gridTileSize = 90;
+
+
             if (!Animating)
             {
                 Timer -= gameTime.ElapsedGameTime.TotalSeconds;
                 if (Timer < 0)
                 {
                     Timer = 4;
-                    //Animating = true;
 
                     var battleResult = testBattle.TakeTurn();
+                    var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
+                    var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize, battleResult.Source.GridLocation.Y * gridTileSize) + gridAnchor;
 
-                    foreach(var damageResult in battleResult.DamageResults)
-                    {
-                        var sourceId = damageResult.Source.Id;
-                        var targetId = damageResult.Target.Id;
-
-                        var sourceEntity = Scene.FindEntity(sourceId.ToString());
-                        var targetEntity = Scene.FindEntity(targetId.ToString());
-
-                        sourceEntity.Tween("LocalPosition", targetEntity.LocalPosition, 2).SetLoops(Nez.Tweens.LoopType.PingPong).Start();
-                        targetEntity.Tween("LocalPosition", targetEntity.LocalPosition + new Vector2(0, -50), 1).SetLoops(Nez.Tweens.LoopType.PingPong).SetDelay(1).Start();
-                    }
+                    sourceEntity.TweenLocalPositionTo(newLocation);
                 }
             }
 

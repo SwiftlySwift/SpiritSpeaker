@@ -135,11 +135,11 @@ namespace SpiritSpeak.Combat.Test
                     new Commander(-1) { Initiative = 3 },
                 }
             };
-            var spirit1 = new Spirit(battle, 1);
-            var spirit2 = new Spirit(battle, 2);
+            var spirit1 = new Spirit(battle, 1, 0, 0);
+            var spirit2 = new Spirit(battle, 2, 0, 1);
             var spirit1friend = new Speaker(battle, 1);
             var spirit2friend = new Speaker(battle, 2);
-            var jerk1 = new Spirit(battle, -1);
+            var jerk1 = new Spirit(battle, -1, 0, 2);
             var jerk2 = new Speaker(battle, -1);
 
             battle.Commanders[0].Spirits.Add(spirit1);
@@ -148,7 +148,7 @@ namespace SpiritSpeak.Combat.Test
             battle.Commanders[1].Spirits.Add(spirit2);
             battle.Commanders[1].Speakers.Add(spirit2friend);
 
-            battle.Commanders[2].Spirits.Add(jerk1);
+            //battle.Commanders[2].Spirits.Add(jerk1);
             battle.Commanders[2].Speakers.Add(jerk2);
 
 
@@ -168,27 +168,27 @@ namespace SpiritSpeak.Combat.Test
             Assert.AreEqual(6, enemies3.Count);
 
             Assert.IsTrue(friends1.Contains(spirit1));
-            Assert.IsTrue(friends1.Contains(spirit1friend));
+            //Assert.IsTrue(friends1.Contains(spirit1friend));
 
             Assert.IsTrue(friends2.Contains(spirit2));
-            Assert.IsTrue(friends2.Contains(spirit2friend));
+            //Assert.IsTrue(friends2.Contains(spirit2friend));
 
             Assert.IsTrue(enemies2.Contains(spirit1));
-            Assert.IsTrue(enemies2.Contains(spirit1friend));
+            //Assert.IsTrue(enemies2.Contains(spirit1friend));
             Assert.IsTrue(enemies2.Contains(jerk1));
-            Assert.IsTrue(enemies2.Contains(jerk2));
+            //Assert.IsTrue(enemies2.Contains(jerk2));
 
             Assert.IsTrue(enemies1.Contains(spirit2));
-            Assert.IsTrue(enemies1.Contains(spirit2friend));
+            //Assert.IsTrue(enemies1.Contains(spirit2friend));
             Assert.IsTrue(enemies1.Contains(jerk1));
-            Assert.IsTrue(enemies1.Contains(jerk2));
+            //Assert.IsTrue(enemies1.Contains(jerk2));
 
             Assert.IsTrue(enemies3.Contains(spirit2));
-            Assert.IsTrue(enemies3.Contains(spirit2friend));
+            //Assert.IsTrue(enemies3.Contains(spirit2friend));
             Assert.IsTrue(enemies3.Contains(jerk1));
-            Assert.IsTrue(enemies3.Contains(jerk2));
+            //Assert.IsTrue(enemies3.Contains(jerk2));
             Assert.IsTrue(enemies3.Contains(spirit1));
-            Assert.IsTrue(enemies3.Contains(spirit1friend));
+            //Assert.IsTrue(enemies3.Contains(spirit1friend));
         }
 
         [TestMethod]
@@ -202,8 +202,8 @@ namespace SpiritSpeak.Combat.Test
                     new Commander(2) { Initiative = 2 },
                 }
             };
-            var spirit1 = new Spirit(battle, 1) { Strength = 10, MaxVitality = 20, Vitality = 20};
-            var spirit2 = new Spirit(battle, 2) { Strength = 5, MaxVitality = 30, Vitality = 30 }; ;
+            var spirit1 = new Spirit(battle, 1, 0, 0) { Strength = 10, MaxVitality = 20, Vitality = 20};
+            var spirit2 = new Spirit(battle, 2, 0, 1) { Strength = 5, MaxVitality = 30, Vitality = 30 }; ;
             var spirit1friend = new Speaker(battle, 1) { Vitality = 20 };
             var spirit2friend = new Speaker(battle, 2) { Vitality = 20 };
 
