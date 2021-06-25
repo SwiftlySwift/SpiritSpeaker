@@ -8,8 +8,8 @@ namespace SpiritSpeak.Combat
 {
     public class Battle
     {
-        public const int GRID_MAX_X = 5;
-        public const int GRID_MAX_Y = 5; 
+        public const int GRID_MAX_X = 4; // 0 idx
+        public const int GRID_MAX_Y = 4; // 0 idx
 
         public List<Speaker> Speakers => Commanders.SelectMany(x => x.Speakers).ToList();
         public List<Spirit> Spirits => Commanders.SelectMany(x => x.Spirits).ToList();

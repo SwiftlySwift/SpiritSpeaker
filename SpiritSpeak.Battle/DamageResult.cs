@@ -2,8 +2,8 @@
 {
     public class DamageResult
     {
-        public ITarget Target { get; set; }
-        public ITarget Source { get; set; }
+        public Spirit Target { get; set; }
+        public Spirit Source { get; set; }
         public int Amount { get; set; }
     }
 }

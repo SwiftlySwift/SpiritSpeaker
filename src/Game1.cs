@@ -5,6 +5,7 @@ using Nez;
 using Nez.Particles;
 using Nez.Sprites;
 using Nez.Textures;
+using Nez.Tweens;
 using SpiritSpeak.Combat;
 using System;
 
@@ -42,11 +43,11 @@ namespace SpiritSpeak
             {
                 Initiative = 1
             };
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0,0,0)
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0,2,1)
             {
                 MaxVitality = 20,
                 Vitality = 20,
-                Strength = 5,
+                Strength = 3,
             });
             //leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
             //{
@@ -57,11 +58,11 @@ namespace SpiritSpeak
             testBattle.Commanders.Add(leftCommander);
 
             var rightCommander = new Commander(1);
-            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 4)
+            rightCommander.Spirits.Add(new Spirit(testBattle, 1, 2, 3)
             {
                 MaxVitality = 20,
                 Vitality = 20,
-                Strength = 15,
+                Strength = 3,
             });
             //rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 1)
             //{
@@ -123,7 +124,23 @@ namespace SpiritSpeak
                         var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
                         var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize, battleResult.Source.GridLocation.Y * gridTileSize) + gridAnchor;
 
-                        sourceEntity.TweenLocalPositionTo(newLocation).Start();
+                        var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+
+                        foreach(var damage in battleResult.DamageResults)
+                        {
+                            var source = Scene.FindEntity(damage.Source.Id.ToString());
+                            var target = Scene.FindEntity(damage.Target.Id.ToString());
+
+                            var damagePercent = ((float)damage.Target.Vitality / damage.Target.MaxVitality);
+                            var color = new Color(1, damagePercent, damagePercent, 1);
+
+
+                            tween.SetNextTween(source.TweenLocalPositionTo(target.LocalPosition).SetLoops(LoopType.PingPong));
+
+                            target.GetComponent<SpriteRenderer>().TweenColorTo(color).SetDelay(.6f).Start();
+
+                        }
+                        tween.Start();
                     }
                 }
             }

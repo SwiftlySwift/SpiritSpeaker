@@ -49,7 +49,7 @@ namespace SpiritSpeak.Combat
 
             adjacentSquares = adjacentSquares.Where(p => p.X >= 0 && p.X <= Battle.GRID_MAX_X && p.Y >= 0 && p.Y <= Battle.GRID_MAX_Y).ToList(); //Filter illegal squares
 
-            var closestSquare = adjacentSquares.OrderByDescending(p => AbsVector(p - GridLocation)).FirstOrDefault();
+            var closestSquare = adjacentSquares.OrderBy(p => AbsVector(p - GridLocation)).FirstOrDefault();
 
             if (closestSquare == default)
             {
