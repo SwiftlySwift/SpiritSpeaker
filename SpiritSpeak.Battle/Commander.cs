@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SpiritSpeak.Combat
 {
-    public class Commander : ITeamMember
+    public class Commander
     {
         private static Random _random = new Random();
 

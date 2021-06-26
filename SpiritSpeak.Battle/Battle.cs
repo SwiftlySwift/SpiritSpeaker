@@ -11,6 +11,11 @@ namespace SpiritSpeak.Combat
         public const int GRID_MAX_X = 4; // 0 idx
         public const int GRID_MAX_Y = 4; // 0 idx
 
+        public static bool OnTheGrid(Point p)
+        {
+            return p.X >= 0 && p.X <= Battle.GRID_MAX_X && p.Y >= 0 && p.Y <= Battle.GRID_MAX_Y;
+        }
+
         public List<Speaker> Speakers => Commanders.SelectMany(x => x.Speakers).ToList();
         public List<Spirit> Spirits => Commanders.SelectMany(x => x.Spirits).ToList();
         public List<Commander> Commanders { get; set; }
@@ -41,8 +46,14 @@ namespace SpiritSpeak.Combat
                 //wtf?
                 throw new Exception("Battle grid out of sync, spirit not in correct location");
             }
+            var newPoint = new Point(source.GridLocation.X + move.X, source.GridLocation.Y + move.Y);
 
-            var newLocation = Grid[source.GridLocation.X + move.X, source.GridLocation.Y+move.Y];
+            if (!OnTheGrid(newPoint))
+            {
+                return false; //Bad move. Cancel it for now, maybe truncate it edge of map later?
+            }
+
+            var newLocation = Grid[newPoint.X, newPoint.Y];
             if (newLocation.Spirit != null)
             {
                 //Spirit is in the way. This generally calls for cancelling the move, and reveals a hidden unit or trap.

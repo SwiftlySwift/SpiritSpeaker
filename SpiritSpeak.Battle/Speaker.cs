@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SpiritSpeak.Combat
 {
-    public class Speaker : ITarget
+    public class Speaker
     {
         public int Vitality { get; set; }
         

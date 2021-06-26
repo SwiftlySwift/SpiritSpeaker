@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SpiritSpeak.Combat
 {
-    public class Spirit : ITarget
+    public class Spirit
     {
         private int _vitality;
         public int Vitality { get => _vitality; set => _vitality = Math.Max(Math.Min(MaxVitality, value),0); }
@@ -47,7 +47,7 @@ namespace SpiritSpeak.Combat
                 enemy.GridLocation + new Point(-1,0),
             };
 
-            adjacentSquares = adjacentSquares.Where(p => p.X >= 0 && p.X <= Battle.GRID_MAX_X && p.Y >= 0 && p.Y <= Battle.GRID_MAX_Y).ToList(); //Filter illegal squares
+            adjacentSquares = adjacentSquares.Where(Battle.OnTheGrid).ToList(); //Filter illegal squares
 
             var closestSquare = adjacentSquares.OrderBy(p => AbsVector(p - GridLocation)).FirstOrDefault();
 

@@ -13,10 +13,9 @@ namespace SpiritSpeak
 {
     public class Game1 : Nez.Core
     {
-        private Entity myFirstEntity;
-        private Entity mySecondEntity;
-
         private Battle testBattle;
+
+        private HumanCommander _player;
 
         private double Timer = 2d;
         private bool Animating = false;
@@ -37,16 +36,21 @@ namespace SpiritSpeak
 
             Scene = new Scene();
 
+            var sprite = new SpriteRenderer(Scene.Content.Load<Texture2D>("grid"));
+            Scene.CreateEntity("Grid").AddComponent(sprite);
+            sprite.Origin = Vector2.Zero;
+
             testBattle = new Battle();
 
-            var leftCommander = new Commander(0)
+            var leftCommander = new HumanCommander(0)
             {
                 Initiative = 1
             };
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0,2,1)
+            _player = leftCommander;
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0,0,0)
             {
-                MaxVitality = 20,
-                Vitality = 20,
+                MaxVitality = 25,
+                Vitality = 25,
                 Strength = 3,
             });
             //leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
@@ -62,13 +66,13 @@ namespace SpiritSpeak
             {
                 MaxVitality = 20,
                 Vitality = 20,
-                Strength = 3,
+                Strength = 4,
             });
             //rightCommander.Spirits.Add(new Spirit(testBattle, 1, 4, 1)
             //{
             //    MaxVitality = 20,
             //    Vitality = 20,
-            //    Strength = 25,
+            //    Strength = 3,
             //});
             testBattle.Commanders.Add(rightCommander);
 
@@ -83,12 +87,12 @@ namespace SpiritSpeak
 
             var spirits = testBattle.Spirits;
 
-            var gridAnchor = new Vector2(100, 100);
+            var gridAnchor = new Vector2(10, 10);
             var sidx = 5;
-            var gridTileSize = 90;
+            var gridTileSize = 80;
             foreach (var spirit in spirits)
             {
-                var location = new Vector2(spirit.GridLocation.X * gridTileSize, spirit.GridLocation.Y * gridTileSize) + gridAnchor;
+                var location = new Vector2(spirit.GridLocation.X * gridTileSize + gridTileSize/2, spirit.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
                 var entity = Scene.CreateEntity($"{spirit.Id}", location);
                 var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
                 entity.AddComponent(spriteRenderer);
@@ -107,8 +111,41 @@ namespace SpiritSpeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            var gridAnchor = new Vector2(100, 100);
-            var gridTileSize = 90;
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                var spirit = _player.Spirits[0];
+                _player.BattleAction = new BattleAction();
+
+                _player.BattleAction.Source = spirit;
+                _player.BattleAction.Movements.Add(new Point(0, -1));
+                _player.ActionConfirmed = true;
+            }
+
+            if (Input.LeftMouseButtonPressed)
+            {
+                var targetLocation = ( (Input.MousePosition - new Vector2(10, 10)) / 80).ToPoint();
+                var spirit = _player.Spirits[0];
+                var vector = targetLocation - spirit.GridLocation;
+
+                var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
+
+                _player.BattleAction = new BattleAction();
+                _player.BattleAction.Source = spirit;
+                _player.BattleAction.Movements.Add(vector);
+
+
+                if (targetSpirit != null)
+                {
+                    _player.BattleAction.Damage = spirit.Strength;
+                    _player.BattleAction.Target = targetSpirit;
+                }
+
+                _player.ActionConfirmed = true;
+            }
+
+
+            var gridAnchor = new Vector2(10, 10);
+            var gridTileSize = 80;
 
 
             if (!Animating)
@@ -119,10 +156,10 @@ namespace SpiritSpeak
                     Timer = 1;
 
                     var battleResult = testBattle.TakeTurn();
-                    if (battleResult.Source != null)
+                    if (battleResult != null && battleResult.Source != null)
                     {
                         var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
-                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize, battleResult.Source.GridLocation.Y * gridTileSize) + gridAnchor;
+                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize + gridTileSize / 2, battleResult.Source.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
 
                         var tween = sourceEntity.TweenLocalPositionTo(newLocation);
 

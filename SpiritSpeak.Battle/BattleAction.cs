@@ -17,6 +17,11 @@ namespace SpiritSpeak.Combat
 
         public List<Point> Movements { get; set; }
 
+        public BattleAction()
+        {
+            Movements = new List<Point>();
+        }
+
         public BattleActionResult DoAction(Battle battle)
         {
             var result = new BattleActionResult();
