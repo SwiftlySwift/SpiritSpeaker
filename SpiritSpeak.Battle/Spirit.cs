@@ -92,6 +92,44 @@ namespace SpiritSpeak.Combat
             return path;
         }
 
+        public ApproachPath GetApproachPath(Point target)
+        {
+            var currentPosition = new Point(GridLocation.X, GridLocation.Y);
+            var moveAvailable = Movement;
+            var path = new ApproachPath();
+
+            while (currentPosition != target && moveAvailable > 0)
+            {
+                if (currentPosition.X > target.X)
+                {
+                    path.Movements.Add(new Point(-1, 0));
+                    currentPosition += new Point(-1, 0);
+                }
+                else if (currentPosition.X < target.X)
+                {
+                    path.Movements.Add(new Point(1, 0));
+                    currentPosition += new Point(1, 0);
+                }
+                else if (currentPosition.Y > target.Y)
+                {
+                    path.Movements.Add(new Point(0, -1));
+                    currentPosition += new Point(0, -1);
+                }
+                else if (currentPosition.Y < target.Y)
+                {
+                    path.Movements.Add(new Point(0, 1));
+                    currentPosition += new Point(0, 1);
+                }
+                moveAvailable--;
+            }
+            path.Target = currentPosition;
+            if (currentPosition == target)
+            {
+                path.AtTarget = true;
+            }
+            return path;
+        }
+
         internal bool InRangeOf(Spirit target)
         {
             return AbsVector(GridLocation - target.GridLocation) == 1;

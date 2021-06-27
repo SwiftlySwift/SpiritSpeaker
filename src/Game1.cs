@@ -112,48 +112,52 @@ namespace SpiritSpeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                var spirit = _player.Spirits[0];
-                _player.BattleAction = new BattleAction();
+            ReadPlayerInput();
 
-                _player.BattleAction.Source = spirit;
-                _player.BattleAction.Movements.Add(new Point(0, -1));
-                _player.ActionConfirmed = true;
-            }
+            UpdateCombatSprites(gameTime);
 
+            base.Update(gameTime);
+        }
+
+        private void ReadPlayerInput()
+        {
             if (Input.LeftMouseButtonPressed)
             {
-                var targetLocation = ( (Input.MousePosition - new Vector2(10, 10)) / 80).ToPoint();
+                var targetLocation = ((Input.MousePosition - new Vector2(10, 10)) / 80).ToPoint();
                 var spirit = _player.Spirits[0];
-                var vector = targetLocation - spirit.GridLocation;
-                var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
+                var vector = spirit.GetApproachPath(targetLocation);
 
-                _player.BattleAction = new BattleAction();
-                _player.BattleAction.Source = spirit;
-
-                if (targetSpirit != null)
+                if (Battle.OnTheGrid(targetLocation))
                 {
-                    _player.BattleAction.Damage = spirit.Strength;
-                    _player.BattleAction.Target = targetSpirit;
-                    var approach = spirit.GetApproachPath(targetSpirit);
-                    if (approach != null)
+                    var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
+
+                    _player.BattleAction = new BattleAction();
+                    _player.BattleAction.Source = spirit;
+
+                    if (targetSpirit != null)
                     {
-                        _player.BattleAction.Movements = approach.Movements;
+                        _player.BattleAction.Damage = spirit.Strength;
+                        _player.BattleAction.Target = targetSpirit;
+                        var approach = spirit.GetApproachPath(targetSpirit);
+                        if (approach != null)
+                        {
+                            _player.BattleAction.Movements = approach.Movements;
+                        }
                     }
-                }
-                else
-                {
-                    _player.BattleAction.Movements.Add(vector);
-                }
+                    else
+                    {
+                        _player.BattleAction.Movements = vector.Movements;
+                    }
 
-                _player.ActionConfirmed = true;
+                    _player.ActionConfirmed = true;
+                }
             }
+        }
 
-
+        private void UpdateCombatSprites(GameTime gameTime)
+        {
             var gridAnchor = new Vector2(10, 10);
             var gridTileSize = 80;
-
 
             if (!Animating)
             {
@@ -170,7 +174,7 @@ namespace SpiritSpeak
 
                         var tween = sourceEntity.TweenLocalPositionTo(newLocation);
 
-                        foreach(var damage in battleResult.DamageResults)
+                        foreach (var damage in battleResult.DamageResults)
                         {
                             var source = Scene.FindEntity(damage.Source.Id.ToString());
                             var target = Scene.FindEntity(damage.Target.Id.ToString());
@@ -188,8 +192,6 @@ namespace SpiritSpeak
                     }
                 }
             }
-
-            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
