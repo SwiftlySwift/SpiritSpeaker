@@ -47,11 +47,12 @@ namespace SpiritSpeak
                 Initiative = 1
             };
             _player = leftCommander;
-            leftCommander.Spirits.Add(new Spirit(testBattle, 0,0,0)
+            leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 0)
             {
                 MaxVitality = 25,
                 Vitality = 25,
                 Strength = 3,
+                Movement = 2
             });
             //leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 1)
             //{
@@ -126,18 +127,24 @@ namespace SpiritSpeak
                 var targetLocation = ( (Input.MousePosition - new Vector2(10, 10)) / 80).ToPoint();
                 var spirit = _player.Spirits[0];
                 var vector = targetLocation - spirit.GridLocation;
-
                 var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
                 _player.BattleAction = new BattleAction();
                 _player.BattleAction.Source = spirit;
-                _player.BattleAction.Movements.Add(vector);
-
 
                 if (targetSpirit != null)
                 {
                     _player.BattleAction.Damage = spirit.Strength;
                     _player.BattleAction.Target = targetSpirit;
+                    var approach = spirit.GetApproachPath(targetSpirit);
+                    if (approach != null)
+                    {
+                        _player.BattleAction.Movements = approach.Movements;
+                    }
+                }
+                else
+                {
+                    _player.BattleAction.Movements.Add(vector);
                 }
 
                 _player.ActionConfirmed = true;
