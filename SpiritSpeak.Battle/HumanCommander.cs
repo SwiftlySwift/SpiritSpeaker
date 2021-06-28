@@ -15,15 +15,15 @@ namespace SpiritSpeak.Combat
 
         public HumanCommander(int teamId) : base(teamId)
         {
-
+            BattleAction = new BattleAction();
         }
 
         public override BattleAction GetAction(Battle battle)
         {
-            if (BattleAction != null && ActionConfirmed)
+            if (ActionConfirmed)
             {
                 var action = BattleAction;
-                BattleAction = null;
+                BattleAction = new BattleAction();
                 ActionConfirmed = false;
                 return action;
             }

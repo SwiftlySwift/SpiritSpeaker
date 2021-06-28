@@ -6,6 +6,7 @@ using Nez.Particles;
 using Nez.Sprites;
 using Nez.Textures;
 using Nez.Tweens;
+using Nez.UI;
 using SpiritSpeak.Combat;
 using System;
 
@@ -124,33 +125,38 @@ namespace SpiritSpeak
             if (Input.LeftMouseButtonPressed)
             {
                 var targetLocation = ((Input.MousePosition - new Vector2(10, 10)) / 80).ToPoint();
-                var spirit = _player.Spirits[0];
-                var vector = spirit.GetApproachPath(targetLocation);
 
                 if (Battle.OnTheGrid(targetLocation))
                 {
+                    var spirit = _player.Spirits[0];
+                    var vector = spirit.GetApproachPath(targetLocation);
                     var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
-                    _player.BattleAction = new BattleAction();
                     _player.BattleAction.Source = spirit;
 
-                    if (targetSpirit != null)
+                    if (targetSpirit != null && targetSpirit != spirit) //Stop hitting yourself
                     {
                         _player.BattleAction.Damage = spirit.Strength;
                         _player.BattleAction.Target = targetSpirit;
-                        var approach = spirit.GetApproachPath(targetSpirit);
-                        if (approach != null)
+
+                        if (_player.BattleAction.Movements.Count == 0)
                         {
-                            _player.BattleAction.Movements = approach.Movements;
+                            var approach = spirit.GetApproachPath(targetSpirit);
+                            if (approach != null)
+                            {
+                                _player.BattleAction.Movements = approach.Movements;
+                            }
                         }
                     }
                     else
                     {
                         _player.BattleAction.Movements = vector.Movements;
                     }
-
-                    _player.ActionConfirmed = true;
                 }
+            }
+            if (Input.IsKeyPressed(Keys.Space))
+            {
+                _player.ActionConfirmed = true;
             }
         }
 

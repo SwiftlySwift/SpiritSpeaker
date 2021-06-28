@@ -27,6 +27,10 @@ namespace SpiritSpeak.Combat
             var result = new BattleActionResult();
             result.DebugMessage = DebugMessage;
 
+            if (Source == null)
+            {
+                return result;
+            }
 
             //Handle Movements
             if (Movements != null)
