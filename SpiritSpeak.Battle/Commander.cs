@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SpiritSpeak.Combat.BattleActions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,35 +25,31 @@ namespace SpiritSpeak.Combat
 
         public virtual BattleAction GetAction(Battle battle)
         {
-            var enemies = battle.GetEnemyTargets(TeamId);
+            var action = new BattleAction();
 
+            var enemies = battle.GetEnemyTargets(TeamId);
             var mySpirit = Spirits[_random.Next(Spirits.Count)];
 
             if (mySpirit != null && enemies.Count > 0)
             {
                 var randomEnemy = enemies[_random.Next(enemies.Count)];
-
                 var approach = mySpirit.GetApproachPath(randomEnemy);
 
-                var action = new BattleAction()
+                var moveAction = new MoveAction()
                 {
-                    DebugMessage = "RAWR!",
-                    Source = mySpirit
+                    Target = mySpirit,
+                    Movements = approach.Movements
                 };
-                if (approach != null)
+                var attackAction = new DamageAction()
                 {
-                    action.Movements = approach.Movements;
-                    if (approach.AtTarget)
-                    {
-                        action.Damage = mySpirit.Strength;
-                        action.Target = randomEnemy;
-                    }
-                }
-
-                return action;
+                    Target = randomEnemy,
+                    Source = mySpirit,
+                    Amount = mySpirit.Strength
+                };
+                moveAction.ChildActions.Add(attackAction); //Move, then attack if possible.
             }
 
-            return new BattleAction() { DebugMessage = "RAWR!" };
+            return action;
         }
     }
 }

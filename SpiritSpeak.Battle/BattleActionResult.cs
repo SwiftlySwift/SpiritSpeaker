@@ -1,25 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
+using SpiritSpeak.Combat.BattleActions;
 using System.Collections.Generic;
 
 namespace SpiritSpeak.Combat
 {
     public class BattleActionResult
     {
-        public string DebugMessage { get; set; }
+        public List<DamageActionResult> DamageActionResults { get; set; }
 
-        public List<DamageResult> DamageResults { get; set; }
-
-        public Spirit Source { get; set; }
-
-        public List<Point> DesiredMoves { get; set; }
-        public List<Point> ActualMoves { get; set; }
-
-        public Point Origin { get; set; }
-        public Point Destination { get; set; }
+        public List<MoveActionResult> MoveActionResults { get; set; }
 
         public BattleActionResult()
         {
-            DamageResults = new List<DamageResult>();
+            DamageActionResults = new List<DamageActionResult>();
+            MoveActionResults = new List<MoveActionResult>();
         }
 
     }

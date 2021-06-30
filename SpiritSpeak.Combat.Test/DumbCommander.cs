@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpiritSpeak.Combat.BattleActions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,7 +16,7 @@ namespace SpiritSpeak.Combat.Test
         {
             return new BattleAction()
             {
-                DebugMessage = "uh....",
+
             };
         }
     }

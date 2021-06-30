@@ -8,6 +8,7 @@ using Nez.Textures;
 using Nez.Tweens;
 using Nez.UI;
 using SpiritSpeak.Combat;
+using SpiritSpeak.Combat.BattleActions;
 using System;
 
 namespace SpiritSpeak
@@ -17,9 +18,12 @@ namespace SpiritSpeak
         private Battle testBattle;
 
         private HumanCommander _player;
+        private bool _madeMove;
+        private bool _madeAttack;
+        private BattleAction _lastAction;
 
         private double Timer = 2d;
-        private bool Animating = false;
+        private int _animationsRunning = 0;
 
         public Game1()
         {
@@ -113,6 +117,11 @@ namespace SpiritSpeak
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (_lastAction == null)
+            {
+                _lastAction = _player.BattleAction;
+            }
+
             ReadPlayerInput();
 
             UpdateCombatSprites(gameTime);
@@ -132,71 +141,78 @@ namespace SpiritSpeak
                     var vector = spirit.GetApproachPath(targetLocation);
                     var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
-                    _player.BattleAction.Source = spirit;
-
-                    if (targetSpirit != null && targetSpirit != spirit) //Stop hitting yourself
+                    if (targetSpirit != null && targetSpirit != spirit && !_madeAttack) //Stop hitting yourself
                     {
-                        _player.BattleAction.Damage = spirit.Strength;
-                        _player.BattleAction.Target = targetSpirit;
+                        var damageAction = new DamageAction();
+                        damageAction.Amount = spirit.Strength;
+                        damageAction.Target = targetSpirit;
+                        damageAction.Source = spirit;
 
-                        if (_player.BattleAction.Movements.Count == 0)
-                        {
-                            var approach = spirit.GetApproachPath(targetSpirit);
-                            if (approach != null)
-                            {
-                                _player.BattleAction.Movements = approach.Movements;
-                            }
-                        }
+                        _lastAction.ChildActions.Add(damageAction);
+                        _lastAction = damageAction;
                     }
-                    else
+                    else if (!_madeMove)
                     {
-                        _player.BattleAction.Movements = vector.Movements;
+                        var moveAction = new MoveAction();
+                        moveAction.Movements = vector.Movements;
+                        moveAction.Target = spirit;
+                        _lastAction.ChildActions.Add(moveAction);
+                        _lastAction = moveAction;
                     }
                 }
             }
             if (Input.IsKeyPressed(Keys.Space))
             {
                 _player.ActionConfirmed = true;
+                _lastAction = null;
             }
         }
 
         private void UpdateCombatSprites(GameTime gameTime)
         {
+
+            if (_animationsRunning == 0)
+            {
+                var battleResult = testBattle.TakeTurn();
+                if (battleResult != null)
+                {
+                    _animationsRunning++; //We are 'running' the root animation.
+                    DisplayBattleResult(battleResult);
+                }
+            }
+        }
+
+        private void DisplayBattleResult(BattleActionResult battleResult)
+        {
             var gridAnchor = new Vector2(10, 10);
             var gridTileSize = 80;
+            _animationsRunning--; //Our parent animation has finished.
 
-            if (!Animating)
+            foreach (var movement in battleResult.MoveActionResults)
             {
-                Timer -= gameTime.ElapsedGameTime.TotalSeconds;
-                if (Timer < 0)
-                {
-                    Timer = 1;
+                var sourceEntity = Scene.FindEntity(movement.Target.Id.ToString());
+                var newLocation = new Vector2(movement.Target.GridLocation.X * gridTileSize + gridTileSize / 2, movement.Target.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
 
-                    var battleResult = testBattle.TakeTurn();
-                    if (battleResult != null && battleResult.Source != null)
-                    {
-                        var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
-                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize + gridTileSize / 2, battleResult.Source.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
+                var tween = sourceEntity.TweenLocalPositionTo(newLocation);
 
-                        var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+                _animationsRunning++;
+                //tween.SetCompletionHandler(x => DisplayBattleResult();
+                tween.Start();
+            }
 
-                        foreach (var damage in battleResult.DamageResults)
-                        {
-                            var source = Scene.FindEntity(damage.Source.Id.ToString());
-                            var target = Scene.FindEntity(damage.Target.Id.ToString());
+            foreach (var damage in battleResult.DamageActionResults)
+            {
+                var source = Scene.FindEntity(damage.Source.Id.ToString());
+                var target = Scene.FindEntity(damage.Target.Id.ToString());
 
-                            var damagePercent = ((float)damage.Target.Vitality / damage.Target.MaxVitality);
-                            var color = new Color(1, damagePercent, damagePercent, 1);
+                var damagePercent = ((float)damage.Target.Vitality / damage.Target.MaxVitality);
+                var color = new Color(1, damagePercent, damagePercent, 1);
 
 
-                            tween.SetNextTween(source.TweenLocalPositionTo(target.LocalPosition).SetLoops(LoopType.PingPong));
+                var tween = source.TweenLocalPositionTo(target.LocalPosition).SetLoops(LoopType.PingPong);
+                tween.Start();
 
-                            target.GetComponent<SpriteRenderer>().TweenColorTo(color).SetDelay(.6f).Start();
-
-                        }
-                        tween.Start();
-                    }
-                }
+                target.GetComponent<SpriteRenderer>().TweenColorTo(color).SetDelay(.6f).Start();
             }
         }
 
