@@ -132,25 +132,25 @@ namespace SpiritSpeak
                     var vector = spirit.GetApproachPath(targetLocation);
                     var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
-                    _player.BattleAction.Source = spirit;
+                    _player.Command.Source = spirit;
 
                     if (targetSpirit != null && targetSpirit != spirit) //Stop hitting yourself
                     {
-                        _player.BattleAction.Damage = spirit.Strength;
-                        _player.BattleAction.Target = targetSpirit;
+                        _player.Command.Action.Damage = spirit.Strength;
+                        _player.Command.Action.Target = targetSpirit;
 
-                        if (_player.BattleAction.Movements.Count == 0)
+                        if (_player.Command.Movements.Count == 0)
                         {
                             var approach = spirit.GetApproachPath(targetSpirit);
                             if (approach != null)
                             {
-                                _player.BattleAction.Movements = approach.Movements;
+                                _player.Command.Movements = approach.Movements;
                             }
                         }
                     }
                     else
                     {
-                        _player.BattleAction.Movements = vector.Movements;
+                        _player.Command.Movements = vector.Movements;
                     }
                 }
             }
