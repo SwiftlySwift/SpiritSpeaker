@@ -11,19 +11,19 @@ namespace SpiritSpeak.Combat
 
         public bool ActionConfirmed { get; set; }
 
-        public BattleAction BattleAction { get; set; }
+        public BattleCommand BattleAction { get; set; }
 
         public HumanCommander(int teamId) : base(teamId)
         {
-            BattleAction = new BattleAction();
+            BattleAction = new BattleCommand();
         }
 
-        public override BattleAction GetAction(Battle battle)
+        public override BattleCommand GetAction(Battle battle)
         {
             if (ActionConfirmed)
             {
                 var action = BattleAction;
-                BattleAction = new BattleAction();
+                BattleAction = new BattleCommand();
                 ActionConfirmed = false;
                 return action;
             }

@@ -11,9 +11,9 @@ namespace SpiritSpeak.Combat.Test
 
         }
 
-        public override BattleAction GetAction(Battle battle)
+        public override BattleCommand GetAction(Battle battle)
         {
-            return new BattleAction()
+            return new BattleCommand()
             {
                 DebugMessage = "uh....",
             };

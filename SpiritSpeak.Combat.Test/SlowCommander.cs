@@ -13,13 +13,13 @@ namespace SpiritSpeak.Combat.Test
 
         }
 
-        public override BattleAction GetAction(Battle battle)
+        public override BattleCommand GetAction(Battle battle)
         {
             delay++;
             if (delay < 3)
                 return null;
 
-            return new BattleAction()
+            return new BattleCommand()
             {
                 DebugMessage = "oh!",
             };

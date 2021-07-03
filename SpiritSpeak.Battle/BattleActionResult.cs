@@ -21,6 +21,5 @@ namespace SpiritSpeak.Combat
         {
             DamageResults = new List<DamageResult>();
         }
-
     }
 }

@@ -22,7 +22,7 @@ namespace SpiritSpeak.Combat
             TeamId = teamId;
         }
 
-        public virtual BattleAction GetAction(Battle battle)
+        public virtual BattleCommand GetAction(Battle battle)
         {
             var enemies = battle.GetEnemyTargets(TeamId);
 
@@ -34,7 +34,7 @@ namespace SpiritSpeak.Combat
 
                 var approach = mySpirit.GetApproachPath(randomEnemy);
 
-                var action = new BattleAction()
+                var action = new BattleCommand()
                 {
                     DebugMessage = "RAWR!",
                     Source = mySpirit
@@ -52,7 +52,7 @@ namespace SpiritSpeak.Combat
                 return action;
             }
 
-            return new BattleAction() { DebugMessage = "RAWR!" };
+            return new BattleCommand() { DebugMessage = "RAWR!" };
         }
     }
 }
