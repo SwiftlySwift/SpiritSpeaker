@@ -34,29 +34,23 @@ namespace SpiritSpeak.Combat
 
                 var approach = mySpirit.GetApproachPath(randomEnemy);
 
-                var command = new BattleCommand()
-                {
-                    DebugMessage = "RAWR!",
-                    Source = mySpirit
-                };
-                var action = command.Action;
+                var command = new BattleCommand();
 
-
-                if (approach != null)
-                {
-                    command.Movements = approach.Movements;
-                    if (approach.AtTarget)
-                    {
-                        action.Damage = mySpirit.Strength;
-                        action.Target = randomEnemy;
-                        action.AnimationName = "bop";
-                    }
-                }
+                //if (approach != null)
+                //{
+                //    command.Movements = approach.Movements;
+                //    if (approach.AtTarget)
+                //    {
+                //        action.Damage = mySpirit.Strength;
+                //        action.Target = randomEnemy;
+                //        action.AnimationName = "bop";
+                //    }
+                //}
 
                 return command;
             }
 
-            return new BattleCommand() { DebugMessage = "RAWR!" };
+            return new BattleCommand() {};
         }
     }
 }

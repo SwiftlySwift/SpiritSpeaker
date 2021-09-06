@@ -8,7 +8,9 @@ using Nez.Textures;
 using Nez.Tweens;
 using Nez.UI;
 using SpiritSpeak.Combat;
+using SpiritSpeak.Combat.Actions;
 using System;
+using System.Linq;
 
 namespace SpiritSpeak
 {
@@ -128,30 +130,7 @@ namespace SpiritSpeak
 
                 if (Battle.OnTheGrid(targetLocation))
                 {
-                    var spirit = _player.Spirits[0];
-                    var vector = spirit.GetApproachPath(targetLocation);
-                    var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
-                    _player.Command.Source = spirit;
-
-                    if (targetSpirit != null && targetSpirit != spirit) //Stop hitting yourself
-                    {
-                        _player.Command.Action.Damage = spirit.Strength;
-                        _player.Command.Action.Target = targetSpirit;
-
-                        if (_player.Command.Movements.Count == 0)
-                        {
-                            var approach = spirit.GetApproachPath(targetSpirit);
-                            if (approach != null)
-                            {
-                                _player.Command.Movements = approach.Movements;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _player.Command.Movements = vector.Movements;
-                    }
                 }
             }
             if (Input.IsKeyPressed(Keys.Space))
@@ -173,31 +152,63 @@ namespace SpiritSpeak
                     Timer = 1;
 
                     var battleResult = testBattle.TakeTurn();
-                    if (battleResult != null && battleResult.Source != null)
+
+                    //First process movements that aren't Shoves
+                    foreach (var a in battleResult.MovementResults.Where(x => !x.Shove))
                     {
-                        var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
-                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize + gridTileSize / 2, battleResult.Source.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
+                        HandleMoves(a);
+                    }
 
-                        var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+                    //Calculate animations
+                    foreach (var a in battleResult.AnimationResults)
+                    {
+                        HandleAnimations(a);
+                    }
 
-                        foreach (var damage in battleResult.DamageResults)
-                        {
-                            var source = Scene.FindEntity(damage.Source.Id.ToString());
-                            var target = Scene.FindEntity(damage.Target.Id.ToString());
+                    //Calculate if/how terrain changes
+                    foreach (var a in battleResult.TerrainResults)
+                    {
+                        HandleTerrainChanges(a);
+                    }
 
-                            var damagePercent = ((float)damage.Target.Vitality / damage.Target.MaxVitality);
-                            var color = new Color(1, damagePercent, damagePercent, 1);
+                    //Lastly process movements that are Shoves
+                    foreach (var m in battleResult.MovementResults.Where(x=> x.Shove))
+                    {
+                        HandleShoves(m);
+                    }
 
-
-                            tween.SetNextTween(source.TweenLocalPositionTo(target.LocalPosition).SetLoops(LoopType.PingPong));
-
-                            target.GetComponent<SpriteRenderer>().TweenColorTo(color).SetDelay(.6f).Start();
-
-                        }
-                        tween.Start();
+                    //Deal damage
+                    foreach (var a in battleResult.DamageResults)
+                    {
+                        HandleDamage(a);
                     }
                 }
             }
+        }
+
+        private void HandleDamage(DamageResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleShoves(MovementResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleTerrainChanges(TerrainResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleAnimations(AnimationResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMoves(MovementResult a)
+        {
+            throw new NotImplementedException();
         }
 
         protected override void Draw(GameTime gameTime)

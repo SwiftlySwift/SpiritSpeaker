@@ -21,7 +21,6 @@ namespace SpiritSpeak.Combat.Test
 
             return new BattleCommand()
             {
-                DebugMessage = "oh!",
             };
         }
     }
