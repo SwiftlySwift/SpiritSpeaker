@@ -6,7 +6,7 @@ namespace SpiritSpeak.Combat.Actions
 {
     public class DamageAction : BaseAction
     {
-        int Amount { get; set; }
+        public int Amount { get; set; }
         public DamageAction()
         {
 

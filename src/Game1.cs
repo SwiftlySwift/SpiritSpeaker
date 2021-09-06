@@ -10,6 +10,7 @@ using Nez.UI;
 using SpiritSpeak.Combat;
 using SpiritSpeak.Combat.Actions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SpiritSpeak
@@ -22,6 +23,12 @@ namespace SpiritSpeak
 
         private double Timer = 2d;
         private bool Animating = false;
+
+        private Dictionary<string, ITween<Vector2>> _currentTweens;
+
+
+        private int _gridTileSize = 80;
+        private Vector2 _gridAnchor = new Vector2(10, 10);
 
         public Game1()
         {
@@ -45,11 +52,11 @@ namespace SpiritSpeak
 
             testBattle = new Battle();
 
-            var leftCommander = new HumanCommander(0)
+            var leftCommander = new Commander(0)
             {
                 Initiative = 1
             };
-            _player = leftCommander;
+            //_player = leftCommander;
             leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 0)
             {
                 MaxVitality = 25,
@@ -135,7 +142,7 @@ namespace SpiritSpeak
             }
             if (Input.IsKeyPressed(Keys.Space))
             {
-                _player.ActionConfirmed = true;
+                //_player.ActionConfirmed = true;
             }
         }
 
@@ -157,6 +164,8 @@ namespace SpiritSpeak
                     {
                         return;
                     }
+
+                    _currentTweens = new Dictionary<string, ITween<Vector2>>();
 
                     //First process movements that aren't Shoves
                     foreach (var a in battleResult.MovementResults.Where(x => !x.Shove))
@@ -193,7 +202,13 @@ namespace SpiritSpeak
 
         private void HandleDamage(DamageResult a)
         {
-            throw new NotImplementedException();
+            var id = a.Target.Id.ToString();
+            var sourceEntity = Scene.FindEntity(id);
+            var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2 + 5) + _gridAnchor;
+
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation).SetLoops(LoopType.PingPong,3);
+
+            AddPositionTweenToEntity(id, tween);
         }
 
         private void HandleShoves(MovementResult a)
@@ -208,12 +223,32 @@ namespace SpiritSpeak
 
         private void HandleAnimations(AnimationResult a)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         private void HandleMoves(MovementResult a)
         {
-            throw new NotImplementedException();
+            var id = a.Source.Id.ToString();
+            var sourceEntity = Scene.FindEntity(id);
+            var newLocation = new Vector2(a.Source.GridLocation.X * _gridTileSize + _gridTileSize / 2, a.Source.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+
+            AddPositionTweenToEntity(id, tween);
+        }
+
+        private void AddPositionTweenToEntity(string id, ITween<Vector2> tween)
+        {
+            if (_currentTweens.TryGetValue(id, out var ogTween))
+            {
+                ogTween.SetNextTween(tween);
+                _currentTweens[id] = tween;
+            }
+            else
+            {
+                _currentTweens.Add(id, tween);
+                tween.Start();
+            }
         }
 
         protected override void Draw(GameTime gameTime)
