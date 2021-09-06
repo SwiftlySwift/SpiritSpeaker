@@ -153,6 +153,11 @@ namespace SpiritSpeak
 
                     var battleResult = testBattle.TakeTurn();
 
+                    if (battleResult == null)
+                    {
+                        return;
+                    }
+
                     //First process movements that aren't Shoves
                     foreach (var a in battleResult.MovementResults.Where(x => !x.Shove))
                     {
