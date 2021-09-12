@@ -29,6 +29,7 @@ namespace SpiritSpeak
 
         private int _gridTileSize = 80;
         private Vector2 _gridAnchor = new Vector2(10, 10);
+        private int gridSize = 5;
 
         public Game1()
         {
@@ -98,15 +99,22 @@ namespace SpiritSpeak
 
             var spirits = testBattle.Spirits;
 
-            var gridAnchor = new Vector2(10, 10);
             var sidx = 5;
-            var gridTileSize = 80;
+            var idx = 0;
             foreach (var spirit in spirits)
             {
-                var location = new Vector2(spirit.GridLocation.X * gridTileSize + gridTileSize/2, spirit.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
+                var location = new Vector2(spirit.GridLocation.X * _gridTileSize + _gridTileSize / 2, spirit.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+                var locationUI = new Vector2(6 * _gridTileSize, _gridTileSize * idx + _gridTileSize / 2);
+
                 var entity = Scene.CreateEntity($"{spirit.Id}", location);
-                var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
+                var entityUi = Scene.CreateEntity($"{spirit.Id}-Faceplate", locationUI);
+                var spriteRenderer = new SpriteRenderer(sprites[sidx]);
+                var spriteRendererUI = new SpriteRenderer(sprites[sidx]);
                 entity.AddComponent(spriteRenderer);
+                entityUi.AddComponent(spriteRendererUI);
+
+                idx++;
+                sidx++;
             }
         }
 
@@ -156,7 +164,7 @@ namespace SpiritSpeak
                 Timer -= gameTime.ElapsedGameTime.TotalSeconds;
                 if (Timer < 0)
                 {
-                    Timer = 1;
+                    Timer = 3;
 
                     var battleResult = testBattle.TakeTurn();
 
@@ -204,9 +212,17 @@ namespace SpiritSpeak
         {
             var id = a.Target.Id.ToString();
             var sourceEntity = Scene.FindEntity(id);
-            var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2 + 5) + _gridAnchor;
+            var faceplate = Scene.FindEntity($"{id}-Faceplate");
+            var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2 + 5, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
 
-            var tween = sourceEntity.TweenLocalPositionTo(newLocation).SetLoops(LoopType.PingPong,3);
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation,.05f).SetLoops(LoopType.PingPong,3);
+
+            var white = new Vector4(1, 1, 1, 1);
+            var red = new Vector4(1, 0, 0, 1);
+            var blend = white * a.Target.PercentVitality + red * (1 - a.Target.PercentVitality);
+            var blendedColor = new Color(blend);
+
+            faceplate.GetComponent<SpriteRenderer>().TweenColorTo(blendedColor).Start(); //Setup a known tween for color modulated objects and call jump to elapsed time when changing the color?
 
             AddPositionTweenToEntity(id, tween);
         }

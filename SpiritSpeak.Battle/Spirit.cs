@@ -12,6 +12,8 @@ namespace SpiritSpeak.Combat
         public int Vitality { get => _vitality; set => _vitality = Math.Max(Math.Min(MaxVitality, value),0); }
         public int MaxVitality { get; set; }
 
+        public float PercentVitality => (float)Vitality / MaxVitality;
+
         public int Strength { get; set; }
         public int Movement { get; set; }
 

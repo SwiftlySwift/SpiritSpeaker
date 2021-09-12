@@ -24,6 +24,7 @@ namespace SpiritSpeak.Combat.Actions
                     Amount = Amount,
                     Target = target
                 });
+                target.Vitality -= Amount;
             }
 
             return results;
