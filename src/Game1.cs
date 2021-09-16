@@ -94,24 +94,17 @@ namespace SpiritSpeak
         }
         private void SetupBattle(Battle testBattle)
         {
-            var texture = Content.Load<Texture2D>("Sprites");
-            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
-
             var spirits = testBattle.Spirits;
 
             var sidx = 5;
             var idx = 0;
             foreach (var spirit in spirits)
             {
-                var location = new Vector2(spirit.GridLocation.X * _gridTileSize + _gridTileSize / 2, spirit.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
-                var locationUI = new Vector2(6 * _gridTileSize, _gridTileSize * idx + _gridTileSize / 2);
+                var location = GetGridPositionInPixels(spirit.GridLocation);
+                var locationUI = GetGridPositionInPixels(new Point(7, idx));
 
-                var entity = Scene.CreateEntity($"{spirit.Id}", location);
-                var entityUi = Scene.CreateEntity($"{spirit.Id}-Faceplate", locationUI);
-                var spriteRenderer = new SpriteRenderer(sprites[sidx]);
-                var spriteRendererUI = new SpriteRenderer(sprites[sidx]);
-                entity.AddComponent(spriteRenderer);
-                entityUi.AddComponent(spriteRendererUI);
+                CreateSpriteEntity(sidx, spirit.Id.ToString(), location);
+                CreateSpriteEntity(sidx, $"{spirit.Id}-Faceplate", locationUI);
 
                 idx++;
                 sidx++;
@@ -156,9 +149,6 @@ namespace SpiritSpeak
 
         private void UpdateCombatSprites(GameTime gameTime)
         {
-            var gridAnchor = new Vector2(10, 10);
-            var gridTileSize = 80;
-
             if (!Animating)
             {
                 Timer -= gameTime.ElapsedGameTime.TotalSeconds;
@@ -215,7 +205,7 @@ namespace SpiritSpeak
             var faceplate = Scene.FindEntity($"{id}-Faceplate");
             var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2 + 5, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
 
-            var tween = sourceEntity.TweenLocalPositionTo(newLocation,.05f).SetLoops(LoopType.PingPong,3);
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation,.05f).SetDelay(.3f).SetLoops(LoopType.PingPong,3);
 
             var white = new Vector4(1, 1, 1, 1);
             var red = new Vector4(1, 0, 0, 1);
@@ -239,7 +229,29 @@ namespace SpiritSpeak
 
         private void HandleAnimations(AnimationResult a)
         {
-            //throw new NotImplementedException();
+            if  (a.Animation == AnimationType.Throw)
+            {
+                var origin = GetGridPositionInPixels(a.Source.GridLocation);
+                foreach (var target in a.Targetting.DirectTargets)
+                {
+                    var entity = CreateSpriteEntity(a.SpriteId, Guid.NewGuid().ToString(), new Vector2(-10000,-10000));
+                    
+                    var destination = GetGridPositionInPixels(target.GridLocation);
+
+                    entity.TweenLocalPositionTo(origin,0.0001f).SetDelay(a.DelayInSeconds)
+                        .SetNextTween(entity.TweenLocalPositionTo(destination).SetEaseType(EaseType.BounceOut)
+                        .SetCompletionHandler(x => entity.Destroy()))
+                        .Start();
+                }
+            }
+            else if (a.Animation == AnimationType.DoubleBonk)
+            {
+
+            }
+            else if (a.Animation == AnimationType.Shove)
+            {
+
+            }
         }
 
         private void HandleMoves(MovementResult a)
@@ -265,6 +277,21 @@ namespace SpiritSpeak
                 _currentTweens.Add(id, tween);
                 tween.Start();
             }
+        }
+
+        private Vector2 GetGridPositionInPixels(Point p)
+        {
+            return new Vector2(p.X * _gridTileSize + _gridTileSize / 2, p.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+        }
+        private Entity CreateSpriteEntity(int spriteId, string entityId, Vector2 location)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
+
+            var entity = Scene.CreateEntity($"{entityId}", location);
+            var spriteRenderer = new SpriteRenderer(sprites[spriteId]);
+            entity.AddComponent(spriteRenderer);
+            return entity;
         }
 
         protected override void Draw(GameTime gameTime)

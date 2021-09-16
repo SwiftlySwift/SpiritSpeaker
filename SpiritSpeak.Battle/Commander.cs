@@ -37,19 +37,19 @@ namespace SpiritSpeak.Combat
 
                 var command = new BattleCommand();
 
-                if (approach.Movements.Count > 0)
-                {
-                    var moveAction = new MovementAction()
-                    {
-                        IgnoreTerrain = false,
-                        Movements = approach.Movements,
-                        Shove = false,
-                        Source = mySpirit,
-                        Targetting = null
-                    };
-                    command.MovementActions.Add(moveAction);
-                }
-                if (approach.AtTarget)
+                //if (approach.Movements.Count > 0)
+                //{
+                //    var moveAction = new MovementAction()
+                //    {
+                //        IgnoreTerrain = false,
+                //        Movements = approach.Movements,
+                //        Shove = false,
+                //        Source = mySpirit,
+                //        Targetting = null
+                //    };
+                //    command.MovementActions.Add(moveAction);
+                //}
+                if (true)//approach.AtTarget)
                 {
                     var attackAction = new DamageAction()
                     {
@@ -67,7 +67,9 @@ namespace SpiritSpeak.Combat
                         {
                             DirectTargets = new List<Spirit>() { randomEnemy }
                         },
-                        Animation = Animation.Bonk
+                        Animation = AnimationType.Throw,
+                        SpriteId = 14,
+                        DelayInSeconds = .3f
                     };
 
                     command.DamageActions.Add(attackAction);
