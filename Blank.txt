@@ -1,0 +1,5 @@
+
+#ThePlan
+
+#Add animations
+#Add animation in progress tracking so turns can end dynamically, and last longer as needed

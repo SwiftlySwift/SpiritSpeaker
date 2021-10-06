@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SpiritSpeak.Combat.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,57 +8,51 @@ namespace SpiritSpeak.Combat
 {
     public class BattleCommand
     {
-        public string DebugMessage { get; set; }
-        public Spirit Source { get; set; }
-        public List<Point> Movements { get; set; }
-        public BattleAction Action { get; set; }
+        public List<MovementAction> MovementActions { get; set; } 
+        public List<DamageAction> DamageActions { get; set; } 
+        public List<TerrainAction> TerrainActions { get; set; } 
+        public List<AnimationAction> AnimationActions { get; set; } 
 
         public BattleCommand()
         {
-            Movements = new List<Point>();
-            Action = new BattleAction();
+            MovementActions = new List<MovementAction>();
+            DamageActions = new List<DamageAction>();
+            TerrainActions = new List<TerrainAction>();
+            AnimationActions = new List<AnimationAction>();
         }
 
         public BattleActionResult DoAction(Battle battle)
         {
             var result = new BattleActionResult();
-            result.DebugMessage = DebugMessage;
 
-            if (Source == null)
+            //First process movements that aren't Shoves
+            foreach(var a in MovementActions.Where(x => !x.Shove))
             {
-                return result;
+                result.MovementResults.Add(a.GetResult(battle));
             }
 
-            //Handle Movements
-            if (Movements != null)
+            //Deal damage
+            foreach (var a in DamageActions)
             {
-                result.DesiredMoves = Movements;
-                result.Origin = Source.GridLocation;
-                result.Source = Source;
-                var idx = 0;
-                foreach(var move in Movements)
-                {
-                    var succeeded = battle.MoveSpirit(Source, move);
-                    if (!succeeded)
-                    {
-                        break; //If something blocked our move, stop moving. 
-                    }
-                    idx++;
-                }
-                result.ActualMoves = Movements.Take(idx).ToList(); //Trim to just the successful moves
-                result.Destination = Source.GridLocation;
+                result.DamageResults.AddRange(a.GetResult(battle));
             }
 
-            if (Action.Target != null && Source.InRangeOf(Action.Target))
+            //Calculate if/how terrain changes
+            foreach (var a in TerrainActions)
             {
-                var damage = Action.Target.TakeDamage(Action.Damage);
+                result.TerrainResults.Add(a.GetResult(battle));
+            }
 
-                result.DamageResults.Add(new DamageResult()
-                {
-                    Amount = damage,
-                    Source = Source,
-                    Target = Action.Target
-                });
+            //Calculate animations
+            foreach (var a in AnimationActions)
+            {
+                result.AnimationResults.Add(a.GetResult(battle));
+            }
+
+            //Lastly process movements that are Shoves
+            foreach (var m in MovementActions.Where(x => x.Shove))
+            {
+                result.MovementResults.Add(m.GetResult(battle));
             }
 
             return result;
