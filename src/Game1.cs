@@ -53,7 +53,7 @@ namespace SpiritSpeak
 
             testBattle = new Battle();
 
-            var leftCommander = new Commander(0)
+            var leftCommander = new HumanCommander(0)
             {
                 Initiative = 1
             };
