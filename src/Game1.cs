@@ -8,7 +8,10 @@ using Nez.Textures;
 using Nez.Tweens;
 using Nez.UI;
 using SpiritSpeak.Combat;
+using SpiritSpeak.Combat.Actions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SpiritSpeak
 {
@@ -20,6 +23,13 @@ namespace SpiritSpeak
 
         private double Timer = 2d;
         private bool Animating = false;
+
+        private Dictionary<string, ITween<Vector2>> _currentTweens;
+
+
+        private int _gridTileSize = 80;
+        private Vector2 _gridAnchor = new Vector2(10, 10);
+        private int gridSize = 5;
 
         public Game1()
         {
@@ -47,7 +57,7 @@ namespace SpiritSpeak
             {
                 Initiative = 1
             };
-            _player = leftCommander;
+            //_player = leftCommander;
             leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 0)
             {
                 MaxVitality = 25,
@@ -84,20 +94,20 @@ namespace SpiritSpeak
         }
         private void SetupBattle(Battle testBattle)
         {
-            var texture = Content.Load<Texture2D>("Sprites");
-            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
-
             var spirits = testBattle.Spirits;
 
-            var gridAnchor = new Vector2(10, 10);
             var sidx = 5;
-            var gridTileSize = 80;
+            var idx = 0;
             foreach (var spirit in spirits)
             {
-                var location = new Vector2(spirit.GridLocation.X * gridTileSize + gridTileSize/2, spirit.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
-                var entity = Scene.CreateEntity($"{spirit.Id}", location);
-                var spriteRenderer = new SpriteRenderer(sprites[sidx++]);
-                entity.AddComponent(spriteRenderer);
+                var location = GetGridPositionInPixels(spirit.GridLocation);
+                var locationUI = GetGridPositionInPixels(new Point(7, idx));
+
+                CreateSpriteEntity(sidx, spirit.Id.ToString(), location);
+                CreateSpriteEntity(sidx, $"{spirit.Id}-Faceplate", locationUI);
+
+                idx++;
+                sidx++;
             }
         }
 
@@ -128,76 +138,160 @@ namespace SpiritSpeak
 
                 if (Battle.OnTheGrid(targetLocation))
                 {
-                    var spirit = _player.Spirits[0];
-                    var vector = spirit.GetApproachPath(targetLocation);
-                    var targetSpirit = testBattle.Grid[targetLocation.X, targetLocation.Y].Spirit;
 
-                    _player.Command.Source = spirit;
-
-                    if (targetSpirit != null && targetSpirit != spirit) //Stop hitting yourself
-                    {
-                        _player.Command.Action.Damage = spirit.Strength;
-                        _player.Command.Action.Target = targetSpirit;
-
-                        if (_player.Command.Movements.Count == 0)
-                        {
-                            var approach = spirit.GetApproachPath(targetSpirit);
-                            if (approach != null)
-                            {
-                                _player.Command.Movements = approach.Movements;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _player.Command.Movements = vector.Movements;
-                    }
                 }
             }
             if (Input.IsKeyPressed(Keys.Space))
             {
-                _player.ActionConfirmed = true;
+                //_player.ActionConfirmed = true;
             }
         }
 
         private void UpdateCombatSprites(GameTime gameTime)
         {
-            var gridAnchor = new Vector2(10, 10);
-            var gridTileSize = 80;
-
             if (!Animating)
             {
                 Timer -= gameTime.ElapsedGameTime.TotalSeconds;
                 if (Timer < 0)
                 {
-                    Timer = 1;
+                    Timer = 3;
 
                     var battleResult = testBattle.TakeTurn();
-                    if (battleResult != null && battleResult.Source != null)
+
+                    if (battleResult == null)
                     {
-                        var sourceEntity = Scene.FindEntity(battleResult.Source.Id.ToString());
-                        var newLocation = new Vector2(battleResult.Source.GridLocation.X * gridTileSize + gridTileSize / 2, battleResult.Source.GridLocation.Y * gridTileSize + gridTileSize / 2) + gridAnchor;
+                        return;
+                    }
 
-                        var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+                    _currentTweens = new Dictionary<string, ITween<Vector2>>();
 
-                        foreach (var damage in battleResult.DamageResults)
-                        {
-                            var source = Scene.FindEntity(damage.Source.Id.ToString());
-                            var target = Scene.FindEntity(damage.Target.Id.ToString());
+                    //First process movements that aren't Shoves
+                    foreach (var a in battleResult.MovementResults.Where(x => !x.Shove))
+                    {
+                        HandleMoves(a);
+                    }
 
-                            var damagePercent = ((float)damage.Target.Vitality / damage.Target.MaxVitality);
-                            var color = new Color(1, damagePercent, damagePercent, 1);
+                    //Calculate animations
+                    foreach (var a in battleResult.AnimationResults)
+                    {
+                        HandleAnimations(a);
+                    }
 
+                    //Calculate if/how terrain changes
+                    foreach (var a in battleResult.TerrainResults)
+                    {
+                        HandleTerrainChanges(a);
+                    }
 
-                            tween.SetNextTween(source.TweenLocalPositionTo(target.LocalPosition).SetLoops(LoopType.PingPong));
+                    //Lastly process movements that are Shoves
+                    foreach (var m in battleResult.MovementResults.Where(x=> x.Shove))
+                    {
+                        HandleShoves(m);
+                    }
 
-                            target.GetComponent<SpriteRenderer>().TweenColorTo(color).SetDelay(.6f).Start();
-
-                        }
-                        tween.Start();
+                    //Deal damage
+                    foreach (var a in battleResult.DamageResults)
+                    {
+                        HandleDamage(a);
                     }
                 }
             }
+        }
+
+        private void HandleDamage(DamageResult a)
+        {
+            var id = a.Target.Id.ToString();
+            var sourceEntity = Scene.FindEntity(id);
+            var faceplate = Scene.FindEntity($"{id}-Faceplate");
+            var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2 + 5, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation,.05f).SetDelay(.3f).SetLoops(LoopType.PingPong,3);
+
+            var white = new Vector4(1, 1, 1, 1);
+            var red = new Vector4(1, 0, 0, 1);
+            var blend = white * a.Target.PercentVitality + red * (1 - a.Target.PercentVitality);
+            var blendedColor = new Color(blend);
+
+            faceplate.GetComponent<SpriteRenderer>().TweenColorTo(blendedColor).Start(); //Setup a known tween for color modulated objects and call jump to elapsed time when changing the color?
+
+            AddPositionTweenToEntity(id, tween);
+        }
+
+        private void HandleShoves(MovementResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleTerrainChanges(TerrainResult a)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleAnimations(AnimationResult a)
+        {
+            if  (a.Animation == AnimationType.Throw)
+            {
+                var origin = GetGridPositionInPixels(a.Source.GridLocation);
+                foreach (var target in a.Targetting.DirectTargets)
+                {
+                    var entity = CreateSpriteEntity(a.SpriteId, Guid.NewGuid().ToString(), new Vector2(-10000,-10000));
+                    
+                    var destination = GetGridPositionInPixels(target.GridLocation);
+
+                    entity.TweenLocalPositionTo(origin,0.0001f).SetDelay(a.DelayInSeconds)
+                        .SetNextTween(entity.TweenLocalPositionTo(destination).SetEaseType(EaseType.BounceOut)
+                        .SetCompletionHandler(x => entity.Destroy()))
+                        .Start();
+                }
+            }
+            else if (a.Animation == AnimationType.DoubleBonk)
+            {
+
+            }
+            else if (a.Animation == AnimationType.Shove)
+            {
+
+            }
+        }
+
+        private void HandleMoves(MovementResult a)
+        {
+            var id = a.Source.Id.ToString();
+            var sourceEntity = Scene.FindEntity(id);
+            var newLocation = new Vector2(a.Source.GridLocation.X * _gridTileSize + _gridTileSize / 2, a.Source.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+
+            var tween = sourceEntity.TweenLocalPositionTo(newLocation);
+
+            AddPositionTweenToEntity(id, tween);
+        }
+
+        private void AddPositionTweenToEntity(string id, ITween<Vector2> tween)
+        {
+            if (_currentTweens.TryGetValue(id, out var ogTween))
+            {
+                ogTween.SetNextTween(tween);
+                _currentTweens[id] = tween;
+            }
+            else
+            {
+                _currentTweens.Add(id, tween);
+                tween.Start();
+            }
+        }
+
+        private Vector2 GetGridPositionInPixels(Point p)
+        {
+            return new Vector2(p.X * _gridTileSize + _gridTileSize / 2, p.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
+        }
+        private Entity CreateSpriteEntity(int spriteId, string entityId, Vector2 location)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
+
+            var entity = Scene.CreateEntity($"{entityId}", location);
+            var spriteRenderer = new SpriteRenderer(sprites[spriteId]);
+            entity.AddComponent(spriteRenderer);
+            return entity;
         }
 
         protected override void Draw(GameTime gameTime)

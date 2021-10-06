@@ -84,9 +84,6 @@ namespace SpiritSpeak.Combat.Test
 
             var dumbResult = battle.TakeTurn();
             var angryResult = battle.TakeTurn();
-
-            Assert.AreEqual(angryResult.DebugMessage, "RAWR!");
-            Assert.AreEqual(dumbResult.DebugMessage, "uh....");
         }
 
         [TestMethod]
@@ -117,9 +114,6 @@ namespace SpiritSpeak.Combat.Test
             Assert.AreEqual(14, battle.CurrentInitiative);
 
             var angryResult = battle.TakeTurn();
-
-            Assert.AreEqual(angryResult.DebugMessage, "RAWR!");
-            Assert.AreEqual(finallyAResult.DebugMessage, "oh!");
         }
 
 

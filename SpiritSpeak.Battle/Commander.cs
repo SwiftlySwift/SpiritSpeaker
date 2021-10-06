@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SpiritSpeak.Combat.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace SpiritSpeak.Combat
         {
             var enemies = battle.GetEnemyTargets(TeamId);
 
-            var mySpirit = Spirits[_random.Next(Spirits.Count)];
+            var mySpirit = Spirits[_random.Next(Spirits.Count)]; 
 
             if (mySpirit != null && enemies.Count > 0)
             {
@@ -34,29 +35,51 @@ namespace SpiritSpeak.Combat
 
                 var approach = mySpirit.GetApproachPath(randomEnemy);
 
-                var command = new BattleCommand()
-                {
-                    DebugMessage = "RAWR!",
-                    Source = mySpirit
-                };
-                var action = command.Action;
+                var command = new BattleCommand();
 
-
-                if (approach != null)
+                //if (approach.Movements.Count > 0)
+                //{
+                //    var moveAction = new MovementAction()
+                //    {
+                //        IgnoreTerrain = false,
+                //        Movements = approach.Movements,
+                //        Shove = false,
+                //        Source = mySpirit,
+                //        Targetting = null
+                //    };
+                //    command.MovementActions.Add(moveAction);
+                //}
+                if (true)//approach.AtTarget)
                 {
-                    command.Movements = approach.Movements;
-                    if (approach.AtTarget)
+                    var attackAction = new DamageAction()
                     {
-                        action.Damage = mySpirit.Strength;
-                        action.Target = randomEnemy;
-                        action.AnimationName = "bop";
-                    }
+                        Source = mySpirit,
+                        Targetting = new Targetting()
+                        {
+                            DirectTargets = new List<Spirit>() { randomEnemy }
+                        },
+                        Amount = mySpirit.Strength
+                    };
+                    var animationAction = new AnimationAction()
+                    {
+                        Source = mySpirit,
+                        Targetting = new Targetting()
+                        {
+                            DirectTargets = new List<Spirit>() { randomEnemy }
+                        },
+                        Animation = AnimationType.Throw,
+                        SpriteId = 14,
+                        DelayInSeconds = .3f
+                    };
+
+                    command.DamageActions.Add(attackAction);
+                    command.AnimationActions.Add(animationAction);
                 }
 
                 return command;
             }
 
-            return new BattleCommand() { DebugMessage = "RAWR!" };
+            return new BattleCommand() {};
         }
     }
 }
