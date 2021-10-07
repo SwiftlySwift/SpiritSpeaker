@@ -367,13 +367,13 @@ namespace Nez.UI
 		}
 
 
-		public static ProgressBarStyle Create(Color knobBeforeColor, Color knobAfterColor)
+		public static ProgressBarStyle Create(Color knobBeforeColor, Color knobAfterColor, int minHeight = 10)
 		{
 			var knobBefore = new PrimitiveDrawable(knobBeforeColor);
-			knobBefore.MinHeight = 10;
+			knobBefore.MinHeight = minHeight;
 
 			var knobAfter = new PrimitiveDrawable(knobAfterColor);
-			knobAfter.MinWidth = knobAfter.MinHeight = 10;
+			knobAfter.MinWidth = knobAfter.MinHeight = minHeight;
 
 			return new ProgressBarStyle
 			{

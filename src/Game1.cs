@@ -17,6 +17,9 @@ namespace SpiritSpeak
 {
     public class Game1 : Nez.Core
     {
+        private static int ScreenWidth = 1400;
+        private static int ScreenHeight = 900;
+
         private Battle testBattle;
 
         private HumanCommander _player;
@@ -31,21 +34,22 @@ namespace SpiritSpeak
         private Vector2 _gridAnchor = new Vector2(10, 10);
         private int gridSize = 5;
 
+
+
+
         public Game1()
         {
-            //_graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-
         }
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+            Screen.SetSize(ScreenWidth, ScreenHeight);
 
             Scene = new Scene();
+            //Scene.SetDesignResolution(100, 100, Scene.SceneResolutionPolicy.BestFit);
 
             var sprite = new SpriteRenderer(Scene.Content.Load<Texture2D>("grid"));
             Scene.CreateEntity("Grid").AddComponent(sprite);
@@ -91,7 +95,58 @@ namespace SpiritSpeak
             testBattle.StartCombat();
 
             SetupBattle(testBattle);
+
+            SetupUI(testBattle);
+
         }
+        private void SetupUI(Battle testBattle)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
+
+            var entity = Scene.CreateEntity($"UI-MAIN");
+            var canvas = entity.AddComponent<UICanvas>();
+            var table = canvas.Stage.AddElement(new Table());
+
+            table.SetDebug(true);
+            table.SetFillParent(true);
+            table.Right().Top();
+
+            table.Add("Portrait").SetMinHeight(30);
+            table.Add("Health").SetMinHeight(30);
+            //table.Add("Spirit").SetMinHeight(30);
+            table.Row();
+
+            var sidx = 0;
+            foreach(var spirit in testBattle.Spirits)
+            {
+                sidx++;
+                var image = new Image(sprites[sidx]);
+                table.Add(image);
+                var health = new ProgressBar(0, 1, 0.025f, false, ProgressBarStyle.Create(Color.Green, Color.Red, 40));
+                health.SetValue(1);
+                health.Tween("Value",0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
+                var mana = new ProgressBar(0, 1, 0.025f, false, ProgressBarStyle.Create(Color.Aqua, Color.Gray, 40));
+                mana.SetValue(1);
+                mana.Tween("Value", 0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
+                var stack = new Table();
+                stack.DebugAll();
+
+                stack.Add(health).SetMinHeight(40).Bottom();
+                stack.Row();
+                stack.Add(mana).SetMinHeight(40).Top();
+                table.Add(stack);
+                var defaults = table.Row();
+
+            }
+
+           
+            // if creating buttons with just colors (PrimitiveDrawables) it is important to explicitly set the minimum size since the colored textures created
+            // are only 1x1 pixels
+            var button = new Button(ButtonStyle.Create(Color.Black, Color.DarkGray, Color.Green));
+            table.Add(button).SetMinWidth(100).SetMinHeight(70);
+        }
+
         private void SetupBattle(Battle testBattle)
         {
             var spirits = testBattle.Spirits;
