@@ -8,9 +8,17 @@
 .vs/SpiritSpeak/v16/TestStore/0/testlog.manifest
 
 */obj
+*/obj/DesktopGL
 */bin
 src/Content/bin/DesktopGL/Content/Sprites.xnb
 src/Content/obj/DesktopGL/Content/.mgcontent
 src/Content/obj/DesktopGL/Content/.mgcontent
 src/Content/obj/DesktopGL/Content/Sprites.mgcontent
 .vs/SpiritSpeak/DesignTimeBuild/.dtbcache
+*.xnb
+*.mgcontent
+src/Content/obj/DesktopGL/.mgstats
+src/Content/obj/DesktopGL/Content/.mgcontent
+src/Content/obj/DesktopGL/Content/.mgcontent
+src/Content/obj/DesktopGL/Content/.mgcontent
+src/Content/obj/DesktopGL/Content/.mgcontent

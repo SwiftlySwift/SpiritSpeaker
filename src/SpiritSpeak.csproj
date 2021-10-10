@@ -41,4 +41,16 @@
     <ProjectReference Include="..\SpiritSpeak.Battle\SpiritSpeak.Combat.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Content\Georgia.fnt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Georgia_0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Georgia_0.tga">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez;
+using Nez.BitmapFonts;
 using Nez.Particles;
 using Nez.Sprites;
 using Nez.Textures;
@@ -61,7 +62,7 @@ namespace SpiritSpeak
             {
                 Initiative = 1
             };
-            //_player = leftCommander;
+            _player = leftCommander;
             leftCommander.Spirits.Add(new Spirit(testBattle, 0, 0, 0)
             {
                 MaxVitality = 25,
@@ -101,6 +102,12 @@ namespace SpiritSpeak
         }
         private void SetupUI(Battle testBattle)
         {
+            var font = new BitmapFont();
+            font.Load("Content/Georgia.fnt");
+            font.Initialize(true);
+            Graphics.Instance.BitmapFont = font;
+
+
             var texture = Content.Load<Texture2D>("Sprites");
             var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
 
@@ -110,6 +117,7 @@ namespace SpiritSpeak
 
             table.SetDebug(true);
             table.SetFillParent(true);
+            
             table.Right().Top();
 
             table.Add("Portrait").SetMinHeight(30);
@@ -132,9 +140,9 @@ namespace SpiritSpeak
                 var stack = new Table();
                 stack.DebugAll();
 
-                stack.Add(health).SetMinHeight(40).Bottom();
+                stack.Add(health).SetMinHeight(40);
                 stack.Row();
-                stack.Add(mana).SetMinHeight(40).Top();
+                stack.Add(mana).SetMinHeight(40);
                 table.Add(stack);
                 var defaults = table.Row();
 
@@ -144,6 +152,9 @@ namespace SpiritSpeak
             // if creating buttons with just colors (PrimitiveDrawables) it is important to explicitly set the minimum size since the colored textures created
             // are only 1x1 pixels
             var button = new Button(ButtonStyle.Create(Color.Black, Color.DarkGray, Color.Green));
+
+            button.OnClicked += (x => _player.ActionConfirmed = true);
+
             table.Add(button).SetMinWidth(100).SetMinHeight(70);
         }
 
