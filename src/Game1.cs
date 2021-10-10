@@ -112,19 +112,89 @@ namespace SpiritSpeak
             font.Load("Content/Georgia.fnt");
             font.Initialize(true);
             Graphics.Instance.BitmapFont = font;
+            Table table = BuildTurnOrderUI(testBattle);
+            BuildInfoUI(testBattle);
+            BuildMoveUI(testBattle);
 
+            // if creating buttons with just colors (PrimitiveDrawables) it is important to explicitly set the minimum size since the colored textures created
+            // are only 1x1 pixels
+            var button = new Button(ButtonStyle.Create(Color.Black, Color.DarkGray, Color.Green));
+            button.OnClicked += (x => _player.ActionConfirmed = true);
+            table.Add(button).SetMinWidth(100).SetMinHeight(70);
+        }
 
+        private static Table BuildInfoUI(Battle testBattle)
+        {
             var texture = Content.Load<Texture2D>("Sprites");
             var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
 
-            var entity = Scene.CreateEntity($"UI-MAIN");
+            var entity = Scene.CreateEntity($"UI-InfoBox");
+            var canvas = entity.AddComponent<UICanvas>();
+            var table = canvas.Stage.AddElement(new Table());
+
+            table.SetDebug(true);
+            table.SetFillParent(false);
+            table.SetSize(300, 300);
+
+            table.Left().Top();
+            table.SetBackground(new SpriteDrawable(Graphics.Instance.PixelTexture));
+            table.SetColor(Color.LightGray);
+
+            table.Add(new Label("Info goes here", Graphics.Instance.BitmapFont, Color.Black)).SetMinHeight(40).SetMinWidth(40);
+
+            return table;
+        }
+
+        private static Table BuildMoveUI(Battle testBattle)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
+
+            var entity = Scene.CreateEntity($"UI-MoveInfoBox");
+            var canvas = entity.AddComponent<UICanvas>();
+            var Outertable = canvas.Stage.AddElement(new Table());
+            var table = new Table();
+
+            Outertable.SetDebug(true);
+
+            Outertable.SetFillParent(true);
+            Outertable.Bottom();
+
+            var defaults = Outertable.GetRowDefaults();
+            defaults.SetMinHeight(80).SetMinWidth(80).SetPadRight(5).SetPadBottom(5);
+            Outertable.Add("Move1");
+            Outertable.Add("Move2");
+            Outertable.Add("Move3");
+            Outertable.Add("Move4");
+
+            Outertable.Row();
+
+            Outertable.Add(table).SetMinWidth(500).SetMinHeight(200).SetColspan(Outertable.GetColumns());
+            table.SetDebug(true);
+            table.SetFillParent(false);
+            table.SetSize(500, 200);
+            table.SetBackground(new SpriteDrawable(Graphics.Instance.PixelTexture));
+            table.SetColor(Color.LightGreen);
+            table.Top();
+
+            table.Add(new Label("Move info goes here", Graphics.Instance.BitmapFont, Color.Black));
+
+            return table;
+        }
+
+        private static Table BuildTurnOrderUI(Battle testBattle)
+        {
+            var texture = Content.Load<Texture2D>("Sprites");
+            var sprites = Sprite.SpritesFromAtlas(texture, 84, 80);
+
+            var entity = Scene.CreateEntity($"UI-TurnOrder");
             var canvas = entity.AddComponent<UICanvas>();
             var table = canvas.Stage.AddElement(new Table());
 
             table.SetDebug(true);
             table.SetFillParent(true);
-            
-            table.Left().Top();
+
+            table.Right().Top();
 
             table.Add("Portrait");
             table.Add("Health");
@@ -132,7 +202,7 @@ namespace SpiritSpeak
             table.Row();
 
             var sidx = 0;
-            foreach(var spirit in testBattle.Spirits)
+            foreach (var spirit in testBattle.Spirits)
             {
                 sidx++;
                 var image = new Image(sprites[sidx]);
@@ -150,15 +220,11 @@ namespace SpiritSpeak
                 stack.Row();
                 stack.Add(mana).SetMinHeight(40);
                 table.Add(stack);
-                var defaults = table.Row();
+
+                table.Row();
             }
 
-           
-            // if creating buttons with just colors (PrimitiveDrawables) it is important to explicitly set the minimum size since the colored textures created
-            // are only 1x1 pixels
-            var button = new Button(ButtonStyle.Create(Color.Black, Color.DarkGray, Color.Green));
-            button.OnClicked += (x => _player.ActionConfirmed = true);
-            table.Add(button).SetMinWidth(100).SetMinHeight(70);
+            return table;
         }
 
         private void SetupBattle(Battle testBattle)
