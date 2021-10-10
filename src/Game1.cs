@@ -32,7 +32,7 @@ namespace SpiritSpeak
 
 
         private int _gridTileSize = 80;
-        private Vector2 _gridAnchor = new Vector2(10, 10);
+        private Vector2 _gridAnchor;
         private int gridSize = 5;
 
 
@@ -40,6 +40,7 @@ namespace SpiritSpeak
 
         public Game1()
         {
+            _gridAnchor = new Vector2(ScreenWidth/2 - ((gridSize)*_gridTileSize / 2), _gridTileSize + 10);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -52,8 +53,13 @@ namespace SpiritSpeak
             Scene = new Scene();
             //Scene.SetDesignResolution(100, 100, Scene.SceneResolutionPolicy.BestFit);
 
+            var bg_sprite = new SpriteRenderer(Scene.Content.Load<Texture2D>("galaxy"));
+            var bg = Scene.CreateEntity("__bg").AddComponent(bg_sprite);
+            bg_sprite.Origin = Vector2.Zero;
+
             var sprite = new SpriteRenderer(Scene.Content.Load<Texture2D>("grid"));
-            Scene.CreateEntity("Grid").AddComponent(sprite);
+            var grid = Scene.CreateEntity("Grid", _gridAnchor - new Vector2(10,10));
+            grid.AddComponent(sprite);
             sprite.Origin = Vector2.Zero;
 
             testBattle = new Battle();
@@ -118,10 +124,10 @@ namespace SpiritSpeak
             table.SetDebug(true);
             table.SetFillParent(true);
             
-            table.Right().Top();
+            table.Left().Top();
 
-            table.Add("Portrait").SetMinHeight(30);
-            table.Add("Health").SetMinHeight(30);
+            table.Add("Portrait");
+            table.Add("Health");
             //table.Add("Spirit").SetMinHeight(30);
             table.Row();
 
@@ -133,10 +139,10 @@ namespace SpiritSpeak
                 table.Add(image);
                 var health = new ProgressBar(0, 1, 0.025f, false, ProgressBarStyle.Create(Color.Green, Color.Red, 40));
                 health.SetValue(1);
-                health.Tween("Value",0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
+                //health.Tween("Value",0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
                 var mana = new ProgressBar(0, 1, 0.025f, false, ProgressBarStyle.Create(Color.Aqua, Color.Gray, 40));
                 mana.SetValue(1);
-                mana.Tween("Value", 0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
+                //mana.Tween("Value", 0f, 5f).SetLoops(LoopType.PingPong, -1).SetEaseType(EaseType.Linear).Start();
                 var stack = new Table();
                 stack.DebugAll();
 
@@ -145,16 +151,13 @@ namespace SpiritSpeak
                 stack.Add(mana).SetMinHeight(40);
                 table.Add(stack);
                 var defaults = table.Row();
-
             }
 
            
             // if creating buttons with just colors (PrimitiveDrawables) it is important to explicitly set the minimum size since the colored textures created
             // are only 1x1 pixels
             var button = new Button(ButtonStyle.Create(Color.Black, Color.DarkGray, Color.Green));
-
             button.OnClicked += (x => _player.ActionConfirmed = true);
-
             table.Add(button).SetMinWidth(100).SetMinHeight(70);
         }
 
@@ -167,10 +170,10 @@ namespace SpiritSpeak
             foreach (var spirit in spirits)
             {
                 var location = GetGridPositionInPixels(spirit.GridLocation);
-                var locationUI = GetGridPositionInPixels(new Point(7, idx));
+                //var locationUI = GetGridPositionInPixels(new Point(7, idx));
 
                 CreateSpriteEntity(sidx, spirit.Id.ToString(), location);
-                CreateSpriteEntity(sidx, $"{spirit.Id}-Faceplate", locationUI);
+                //CreateSpriteEntity(sidx, $"{spirit.Id}-Faceplate", locationUI);
 
                 idx++;
                 sidx++;
@@ -268,7 +271,7 @@ namespace SpiritSpeak
         {
             var id = a.Target.Id.ToString();
             var sourceEntity = Scene.FindEntity(id);
-            var faceplate = Scene.FindEntity($"{id}-Faceplate");
+            //var faceplate = Scene.FindEntity($"{id}-Faceplate");
             var newLocation = new Vector2(a.Target.GridLocation.X * _gridTileSize + _gridTileSize / 2 + 5, a.Target.GridLocation.Y * _gridTileSize + _gridTileSize / 2) + _gridAnchor;
 
             var tween = sourceEntity.TweenLocalPositionTo(newLocation,.05f).SetDelay(.3f).SetLoops(LoopType.PingPong,3);
@@ -278,7 +281,7 @@ namespace SpiritSpeak
             var blend = white * a.Target.PercentVitality + red * (1 - a.Target.PercentVitality);
             var blendedColor = new Color(blend);
 
-            faceplate.GetComponent<SpriteRenderer>().TweenColorTo(blendedColor).Start(); //Setup a known tween for color modulated objects and call jump to elapsed time when changing the color?
+            //faceplate.GetComponent<SpriteRenderer>().TweenColorTo(blendedColor).Start(); //Setup a known tween for color modulated objects and call jump to elapsed time when changing the color?
 
             AddPositionTweenToEntity(id, tween);
         }
